@@ -88,7 +88,6 @@ namespace EinsteinRiddleSolver
             PermutationGenerator.Permute(str, 0, str.Length - 1);
             var permutations = PermutationGenerator.Permutations;
             // brute force check all combinations and test them until a combination works
-            // todo need to iterate through all combinations
             // like 12345, 12345, 12345, 12345, 12345
             // then 12345, 12345, 12345, 12345, 21345
             // etc
@@ -115,7 +114,6 @@ namespace EinsteinRiddleSolver
                 {
                     Console.WriteLine(number);
                 }
-                //Console.WriteLine(number);
             } while (number != null);
             return null;
         }
@@ -134,7 +132,6 @@ namespace EinsteinRiddleSolver
             // The Norwegian lives next to the house with blue walls.
             // The man in the center house drinks milk. 
             // The house with green walls is just to the left of the house with white walls. 
-
 
             var color = permutations[number.Digits[0]];
             Assign<Color>(houses, color, (house, color) => house.Color = color);
@@ -233,7 +230,6 @@ namespace EinsteinRiddleSolver
         }
     }
 
-
     enum Color { Unknown, Red, Green, White, Yellow, Blue };
 
     enum Nationality { Unknown, English, Swedish, Danish, German, Norwegian };
@@ -243,19 +239,7 @@ namespace EinsteinRiddleSolver
     enum Cigar { Unknown, PallMall, Dunhill, Blend, BlueMasters, Prince };
 
     enum Pet { Unknown, Dogs, Birds, Cats, Horses, Fish };
-
-    class Fact
-    {
-        public int Position { get; set; }
-        public Color Color { get; set; }
-        public Nationality Nationality { get; set; }
-        public Drink Drink { get; set; }
-        public Cigar Cigar { get; set; }
-        public Pet Pet { get; set; }
-        public Func<List<House>, bool> VerificationFunc { get; set; }
-    }
-
-    // todo convert this to record type?
+        
     class House
     {
         public int Position { get; set; }
