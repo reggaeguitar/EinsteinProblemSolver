@@ -141,6 +141,7 @@ namespace EinsteinRiddleSolver
 
             if (houses[1].Color != Color.Blue) return null;
             if (houses[0].Color == Color.White || houses[2].Color == Color.White) return null;
+            if (houses[0].Color == Color.Red) return null;
             if (houses[4].Color == Color.Green) return null;
 
             var nationality = permutations[number.Digits[1]];
@@ -158,6 +159,9 @@ namespace EinsteinRiddleSolver
 
             var pet = permutations[number.Digits[4]];
             Assign<Pet>(houses, pet, (house, pet) => house.Pet = pet);
+
+            // swede has dogs, first house is norwegian
+            if (houses[0].Pet == Pet.Dogs) return null;
 
             return houses;
         }
