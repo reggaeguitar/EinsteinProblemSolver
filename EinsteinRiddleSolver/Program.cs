@@ -10,66 +10,76 @@ namespace EinsteinRiddleSolver
 
         static void Main()
         {
-            var houses = Enumerable.Range(0, NumHouses).Select(x => new House { Position = x }).ToList();
-            var facts = new List<Fact>
+            var rules = new List<Func<List<House>, bool>>
             {
-                new Fact { Nationality = Nationality.English, Color = Color.Red },
-                new Fact { Nationality = Nationality.Swedish, Pet = Pet.Dogs },
-                new Fact { Nationality = Nationality.Danish, Drink = Drink.Tea },
+                // The Englishman lives in the house with red walls.
+                houses => houses.Single(x => x.Nationality == Nationality.English).Color == Color.Red,
+                // The Swede keeps dogs. 
+                houses => houses.Single(x => x.Nationality == Nationality.Swedish).Pet == Pet.Dogs,
+                // The Dane drinks tea. 
+                houses => houses.Single(x => x.Nationality == Nationality.Danish).Drink == Drink.Tea,
                 // The house with green walls is just to the left of the house with white walls. 
-                new Fact { VerificationFunc = houses =>
+                houses =>
                     houses.Single(x => x.Color == Color.White).Position -
-                    houses.Single(x => x.Color == Color.Green).Position == 1 },
-
-                new Fact { Color = Color.Green, Drink = Drink.Coffee },
-                new Fact { Cigar = Cigar.PallMall, Pet = Pet.Birds },
-                new Fact { Color = Color.Yellow, Cigar = Cigar.Dunhill },
-                new Fact { Color = Color.Yellow, Cigar = Cigar.Dunhill },
-                new Fact { Position = 3, Drink = Drink.Milk },
-                new Fact { Position = 0, Nationality = Nationality.Norwegian },
+                    houses.Single(x => x.Color == Color.Green).Position == 1,
+                // The owner of the house with green walls drinks coffee. 
+                houses => houses.Single(x => x.Color == Color.Green).Drink == Drink.Coffee,
+                // The man who smokes Pall Mall keeps birds.
+                houses => houses.Single(x => x.Cigar == Cigar.PallMall).Pet == Pet.Birds,
+                // The owner of the house with yellow walls smokes Dunhills.
+                houses => houses.Single(x => x.Color == Color.Yellow).Cigar == Cigar.Dunhill,
+                // The man in the center house drinks milk. 
+                // house positions 0 indexed
+                houses => houses.Single(x => x.Position == 2).Drink == Drink.Milk,
+                // The Norwegian lives in the first house.
+                houses => houses.Single(x => x.Position == 0).Nationality == Nationality.Norwegian,
                 // The Blend smoker has a neighbor who keeps cats
-                new Fact { VerificationFunc = houses =>
+                houses =>
                     CheckNeighborCondition(houses, 
                         houses => houses.Single(x => x.Cigar == Cigar.Blend), 
-                        house => house.Pet == Pet.Cats) },
+                        house => house.Pet == Pet.Cats),
+                // The man who smokes Blue Masters drinks beer. 
+                houses => houses.Single(x => x.Cigar == Cigar.BlueMasters).Drink == Drink.Beer,
 
-                new Fact { Cigar = Cigar.BlueMasters, Drink = Drink.Beer },
                 // The man who keeps horses lives next to the Dunhill smoker. 
-                new Fact { VerificationFunc = houses =>
+                houses =>
                     CheckNeighborCondition(houses,
                         houses => houses.Single(x => x.Pet == Pet.Horses),
-                        house => house.Cigar == Cigar.Dunhill) },
+                        house => house.Cigar == Cigar.Dunhill),
 
-                new Fact { Nationality = Nationality.German, Cigar = Cigar.Prince },
+                // The German smokes Prince. 
+                houses => houses.Single(x => x.Nationality == Nationality.German).Cigar == Cigar.Prince,
+
                 // The Norwegian lives next to the house with blue walls. 
-                new Fact { VerificationFunc = houses =>
+                houses =>
                     CheckNeighborCondition(houses,
                         houses => houses.Single(x => x.Nationality == Nationality.Norwegian),
-                        house => house.Color == Color.Blue) },
+                        house => house.Color == Color.Blue),
 
                 // The Blend smoker has a neighbor who drinks water. 
-                new Fact { VerificationFunc = houses =>
+                houses =>
                     CheckNeighborCondition(houses,
                         houses => houses.Single(x => x.Cigar == Cigar.Blend),
-                        house => house.Drink == Drink.Water) },
+                        house => house.Drink == Drink.Water),
             };
-            List<House> housesSolved = SolveEinsteinRiddle(houses, facts);
+            List<House> housesSolved = SolveEinsteinRiddle(rules);
             var solution = housesSolved.Single(x => x.Pet == Pet.Fish);
             Console.WriteLine(solution);
         }
 
         class FiveDigitBase120Number
         {
+            private const int Max = 119;
             public List<int> Digits { get; set; }
             public FiveDigitBase120Number Next()
             {
                 // biggest number already
-                if (Digits.All(x => x == 120)) return null;
+                if (Digits.All(x => x == Max)) return null;
                 
                 var copy = new List<int>(Digits);
                 for (int i = 5 - 1; i >= 0; i--)
                 {
-                    if (Digits[i] == 120) continue;
+                    if (Digits[i] == Max) continue;
                     ++copy[i];
                     return new FiveDigitBase120Number { Digits = copy };
                 }
@@ -80,7 +90,7 @@ namespace EinsteinRiddleSolver
                 $"{Digits[0]}{Digits[1]}{Digits[2]}{Digits[3]}{Digits[4]}";
         }
 
-        private static List<House> SolveEinsteinRiddle(List<House> houses, List<Fact> facts)
+        private static List<House> SolveEinsteinRiddle(List<Func<List<House>, bool>> facts)
         {
             var str = "12345";
             PermutationGenerator.Permute(str, 0, str.Length - 1);
@@ -98,7 +108,7 @@ namespace EinsteinRiddleSolver
             // 1 1 1 2 120
             // ...
             // 120 120 120 120 120 
-            var number = new FiveDigitBase120Number { Digits = new List<int> { 1, 1, 1, 1, 1 } };
+            var number = new FiveDigitBase120Number { Digits = new List<int> { 0, 0, 0, 0, 0 } };
             do 
             {
                 var currentHouses = GetHouses(number, permutations);
@@ -107,13 +117,15 @@ namespace EinsteinRiddleSolver
                     return currentHouses;
                 }
                 number = number.Next();
+                Console.WriteLine(number);
             }  while (number != null);            
             return null;
         }
 
-        private static bool PassRules(List<House> currentHouses, List<Fact> facts)
+        private static bool PassRules(List<House> currentHouses, List<Func<List<House>, bool>> rules)
         {
-            throw new NotImplementedException();
+            var passesAllRules = rules.All(fact => fact(currentHouses));
+            return passesAllRules;
         }
 
         private static List<House> GetHouses(FiveDigitBase120Number number, List<string> permutations)
@@ -178,8 +190,7 @@ namespace EinsteinRiddleSolver
                                int l, int r)
         {
             if (l == r)
-            {
-                Console.WriteLine(str);
+            {                
                 Permutations.Add(str);
             }
             else
