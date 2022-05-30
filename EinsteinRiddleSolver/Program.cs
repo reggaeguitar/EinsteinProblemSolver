@@ -27,12 +27,7 @@ namespace EinsteinRiddleSolver
                 // The man who smokes Pall Mall keeps birds.
                 houses => houses.Single(x => x.Cigar == Cigar.PallMall).Pet == Pet.Birds,
                 // The owner of the house with yellow walls smokes Dunhills.
-                houses => houses.Single(x => x.Color == Color.Yellow).Cigar == Cigar.Dunhill,
-                // The man in the center house drinks milk. 
-                // house positions 0 indexed
-                houses => houses.Single(x => x.Position == 2).Drink == Drink.Milk,
-                // The Norwegian lives in the first house.
-                houses => houses.Single(x => x.Position == 0).Nationality == Nationality.Norwegian,
+                houses => houses.Single(x => x.Color == Color.Yellow).Cigar == Cigar.Dunhill,               
                 // The Blend smoker has a neighbor who keeps cats
                 houses =>
                     CheckNeighborCondition(houses, 
@@ -49,12 +44,6 @@ namespace EinsteinRiddleSolver
 
                 // The German smokes Prince. 
                 houses => houses.Single(x => x.Nationality == Nationality.German).Cigar == Cigar.Prince,
-
-                // The Norwegian lives next to the house with blue walls. 
-                houses =>
-                    CheckNeighborCondition(houses,
-                        houses => houses.Single(x => x.Nationality == Nationality.Norwegian),
-                        house => house.Color == Color.Blue),
 
                 // The Blend smoker has a neighbor who drinks water. 
                 houses =>
@@ -116,7 +105,7 @@ namespace EinsteinRiddleSolver
             do
             {
                 var currentHouses = GetHouses(number, permutations);
-                if (PassRules(currentHouses, facts))
+                if (currentHouses != null && PassRules(currentHouses, facts))
                 {
                     return currentHouses;
                 }
@@ -140,14 +129,29 @@ namespace EinsteinRiddleSolver
         private static List<House> GetHouses(FiveDigitBase120Number number, List<string> permutations)
         {
             var houses = Enumerable.Range(0, 5).Select(x => new House { Position = x }).ToList();
+            // hardcoded facts
+            // The Norwegian lives in the first house.
+            // The Norwegian lives next to the house with blue walls.
+            // The man in the center house drinks milk. 
+            // The house with green walls is just to the left of the house with white walls. 
+
+
             var color = permutations[number.Digits[0]];
             Assign<Color>(houses, color, (house, color) => house.Color = color);
+
+            if (houses[1].Color != Color.Blue) return null;
+            if (houses[0].Color == Color.White || houses[2].Color == Color.White) return null;
+            if (houses[4].Color == Color.Green) return null;
 
             var nationality = permutations[number.Digits[1]];
             Assign<Nationality>(houses, nationality, (house, nationality) => house.Nationality = nationality);
 
+            if (houses[0].Nationality != Nationality.Norwegian) return null;
+
             var drink = permutations[number.Digits[2]];
             Assign<Drink>(houses, drink, (house, drink) => house.Drink = drink);
+
+            if (houses[2].Drink != Drink.Milk) return null;
 
             var cigar = permutations[number.Digits[3]];
             Assign<Cigar>(houses, cigar, (house, cigar) => house.Cigar = cigar);
