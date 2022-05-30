@@ -79,15 +79,18 @@ namespace EinsteinRiddleSolver
                 var copy = new List<int>(Digits);
                 for (int i = 5 - 1; i >= 0; i--)
                 {
-                    if (Digits[i] == Max) continue;
+                    if (Digits[i] == Max)
+                    {
+                        copy[i] = 0;
+                        continue;
+                    };
                     ++copy[i];
                     return new FiveDigitBase120Number { Digits = copy };
                 }
                 throw new Exception("Should not have gotten to this point.");
             }
 
-            public override string ToString() =>
-                $"{Digits[0]}{Digits[1]}{Digits[2]}{Digits[3]}{Digits[4]}";
+            public override string ToString() => string.Join('-', Digits);
         }
 
         private static List<House> SolveEinsteinRiddle(List<Func<List<House>, bool>> facts)
@@ -109,7 +112,8 @@ namespace EinsteinRiddleSolver
             // ...
             // 120 120 120 120 120 
             var number = new FiveDigitBase120Number { Digits = new List<int> { 0, 0, 0, 0, 0 } };
-            do 
+            var count = 1;
+            do
             {
                 var currentHouses = GetHouses(number, permutations);
                 if (PassRules(currentHouses, facts))
@@ -117,8 +121,13 @@ namespace EinsteinRiddleSolver
                     return currentHouses;
                 }
                 number = number.Next();
-                Console.WriteLine(number);
-            }  while (number != null);            
+                ++count;
+                if (count % 1000000 == 0)
+                {
+                    Console.WriteLine(number);
+                }
+                //Console.WriteLine(number);
+            } while (number != null);
             return null;
         }
 
