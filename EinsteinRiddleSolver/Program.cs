@@ -120,7 +120,7 @@ namespace EinsteinRiddleSolver
 
         private static bool PassRules(List<House> currentHouses, List<Func<List<House>, bool>> rules)
         {
-            var passesAllRules = rules.All(fact => fact(currentHouses));
+            var passesAllRules = rules.All(rule => rule(currentHouses));
             return passesAllRules;
         }
 
@@ -250,7 +250,6 @@ namespace EinsteinRiddleSolver
         public Pet Pet { get; set; }
 
         public override string ToString() =>
-            $"Position: {Position}, Color: {Color}, Nationality: {Nationality}, Drink: {Drink}, Cigar: {Cigar}, Pet: {Pet}";
-        
+            $"Position: {Position}, Color: {Color}, Nationality: {Nationality}, Drink: {Drink}, Cigar: {Cigar}, Pet: {Pet}";        
     }
 }
