@@ -82,7 +82,7 @@ namespace EinsteinRiddleSolver
             public override string ToString() => string.Join('-', Digits);
         }
 
-        private static List<House> SolveEinsteinRiddle(List<Func<List<House>, bool>> facts)
+        private static List<House> SolveEinsteinRiddle(List<Func<List<House>, bool>> rules)
         {
             var str = "12345";
             PermutationGenerator.Permute(str, 0, str.Length - 1);
@@ -104,7 +104,7 @@ namespace EinsteinRiddleSolver
             do
             {
                 var currentHouses = GetHouses(number, permutations);
-                if (currentHouses != null && PassRules(currentHouses, facts))
+                if (currentHouses != null && PassRules(currentHouses, rules))
                 {
                     return currentHouses;
                 }
